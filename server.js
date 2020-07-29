@@ -1,22 +1,42 @@
+ // Dependencies
 var express = require("express");
-var mongoose = require("mongoose");
+var bodyParser = require("body-parser");
+var logger = require("morgan");
 var exphbs = require("express-handlebars");
-var PORT = process.env.PORT || 3000;
+
+// Express
 var app = express();
-var routes = require("./routes");
+
+// Use morgan and body-parser
+app.use(logger("dev"));
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
+
+app.use(bodyParser.json());
 
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+
 app.use(express.static("public"));
+
+
+// Set Handlebars
 app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
-app.use(routes);
 
-var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
-mongoose.connect(MONGODB_URI);
+// Required the routes
+var routes = require("./routes/html-routes.js");
 
-app.listen(PORT, function() {
-  console.log("Listening on port: " + PORT);
+
+// Begin Routes
+app.use('/', routes);
+
+
+
+var port = process.env.PORT || 3000;
+// Listen on port 3000
+app.listen(port, function() {
+  console.log("App running on port 3000!");
 });
+ 

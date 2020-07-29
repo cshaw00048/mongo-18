@@ -4,17 +4,13 @@ var Schema = mongoose.Schema;
 
 var noteSchema = new Schema({
 
-  _headlineId: {
-    type: Schema.Types.ObjectId,
-    ref: "Headline"
+  title: {
+    type: String
   },
 
-  date: {
-    type: Date,
-    default: Date.now
-  },
-
-  noteText: String
+  body: {
+    type:String
+  }
 });
 
 var Note = mongoose.model("Note", noteSchema);

@@ -1,41 +1,48 @@
-var axios = require("axios");
+//Scraping requirements
+var request = require("request");
 var cheerio = require("cheerio");
-var scrape = function() {
-  return axios.get("http://www.nytimes.com").then(function(res) {
-    var $ = cheerio.load(res.data);
-    console.log("scraping");
-    var articles = [];
+var Article = require("../models/Article");
 
-    $(".assetWrapper").each(function(i, element) {
-      var head = $(this)
-        .find("h2")
-        .text()
-        .trim();
+var site_to_scrape = "http://www.echojs.com/";
 
-      var url = $(this)
-        .find("a")
-        .attr("href");
 
-      var sum = $(this)
-        .find("p")
-        .text()
-        .trim();
 
-      if (head && sum && url) {
-        var headNeat = head.replace(/(\r\n|\n|\r|\t|\s+)/gm, " ").trim();
-        var sumNeat = sum.replace(/(\r\n|\n|\r|\t|\s+)/gm, " ").trim();
+function site_scraper(callback){
+    //Grabbing data from Echo.
+      request(site_to_scrape, function(error, response, html) {
+      
+      var $ = cheerio.load(html);
+      
+      //Only grabbing the h2 and relative data
+      $("article h2").each(function(i, element) {
 
-        var dataToAdd = {
-          headline: headNeat,
-          summary: sumNeat,
-          url: "https://www.nytimes.com" + url
-        };
+        //Empty array for scrape
+        var result = {};
 
-        articles.push(dataToAdd);
-      }
+        result.title = $(this).children("a").text().trim();
+        result.link = $(this).children("a").attr("href");
+
+        // Saving results to Article
+     
+        var entry = new Article(result);
+
+        entry.save(function(err, doc) {
+          if (err) {
+            console.log("This Article Could not be saved: ",err);
+          }
+          else {
+            console.log(doc);
+          }
+        });
+
+      });
+      callback();
     });
-    return articles;
-  });
-};
+  
+} //end of site_scraper
 
-module.exports = scrape;
+
+
+
+
+exports.site_scraper = site_scraper;
